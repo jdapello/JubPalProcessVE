@@ -5,24 +5,15 @@ import subprocess as sp
 import os
 import shutil
 
-#TODO:
-#1 implement rotation for already flattened files
-#2 test color
-#fix upload success message
-#add progress bars
-#3 reevaluate run lock and roi requirements based on process
-#4 white sample?
-#5 streamlit caching?
-
     ##functions##
 
-def run(): #must check all transformation parameters are selected
+def run():
 
     runBar = optionsContainer.progress(0.0, "Creating Directories")
     settings()
     
     runBar.progress(0.1, "Creating Directories")
-    #removes left over Transform directory if files not re-uploaded
+    #removes old Transform directory if files not re-uploaded
     try:
         transformPath = "JubPalProcess/data/" + st.session_state.projectName + "/" + st.session_state.compositeName + "/Transform"
         if os.path.isdir(transformPath):
@@ -34,7 +25,7 @@ def run(): #must check all transformation parameters are selected
     runBar.progress(0.3, "Processing")
 
     print("Start processing...")
-    #25 minute timeout for processs.py given
+    
     processOut = sp.run(["venv/bin/python3", "JubPalProcess/process.py", "JubPalProcess/options.yaml", "noninteractive"], timeout=None, capture_output=True)
    
     print(processOut.stdout)
@@ -88,7 +79,7 @@ def writeOptions():
 def makeDirectories():
     projectDir = "JubPalProcess/data" 
     
-    #trash old data directory
+    #trash old directory
     try:
         path = os.path.join("", projectDir)
         shutil.rmtree(path)
@@ -278,7 +269,7 @@ def findVisibleBands():
     return visible
         
 
-    #disables file upload submit button if misssing requirements
+    #disables upload submit button if misssing requirements
 def uploadLock():
     if (st.session_state.projectName != "" and st.session_state.pageName !="" and st.session_state.images != [] and
         not (st.session_state.mode and st.session_state.flats == [])):
@@ -311,7 +302,7 @@ def optionsLock():
 
 
 def resetInput():
-    #st.session_state.projectName = ""
+    
     if st.session_state.resetCharacter == "":
         st.session_state.resetCharacter = " "
     else:
@@ -331,7 +322,6 @@ def getSize(path):
     return size
 
 #attempting to cache uploads
-#@st.cache_data TODO check this
 def cacheUploads():
     
     st.session_state.images = st.session_state.imageUploads
@@ -380,11 +370,6 @@ with uploadTab:
     #uploadContainer.file_uploader("Import " + st.session_state.inputType + " files here:", accept_multiple_files=True, type=['tif','dng'], key="imageUploads", on_change=cacheUploads)
     uploadContainer.file_uploader("Import " + st.session_state.inputType + " files here:" + st.session_state.resetCharacter, accept_multiple_files=True, type=['tif','dng'], key="images")
 
-   # if "images" not in st.session_state:
-    #    st.session_state.images = cacheUploads(imageUploads)
-   # else:
-   #     st.session_state.images = cacheUploads(imageUploads)
-    
     if st.session_state.mode:
        uploadContainer.file_uploader("Import flats here:" + st.session_state.resetCharacter, accept_multiple_files=True, type=['dng'], key="flats")
     else:
@@ -454,7 +439,7 @@ with controlTab:
    
     left, right = optionsContainer.columns([2,1])
 
-    processOptions = ["PCA", "MNF", "Fica"] #add color
+    processOptions = ["PCA", "MNF", "Fica"] 
     left.segmented_control("Process", processOptions, selection_mode="multi", label_visibility= "visible", key="process")
     #optionsContainer.write(st.session_state.process)
     
